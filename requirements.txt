@@ -1,0 +1,11 @@
+openai-agents
+openai
+langchain
+langchain-community
+langchain-text-splitters
+chromadb
+pypdf
+sentence-transformers
+python-dotenv
+rich
+pydantic
