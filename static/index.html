@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyBuddy | Agentic Study Assistant</title>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="top-nav">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        <path d="M12 6v6"></path>
+                        <path d="M9 9h6"></path>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">StudyBuddy</span>
+                    <span class="brand-badge">Agentic RAG • Groq LPU</span>
+                </div>
+            </div>
+
+            <!-- Segmented View Tabs -->
+            <nav class="view-tabs" role="tablist">
+                <button class="tab-btn active" id="tabChatBtn" data-target="chatView" role="tab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Study Assistant
+                </button>
+                <button class="tab-btn" id="tabQuizBtn" data-target="quizView" role="tab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                    Interactive Quiz
+                </button>
+                <button class="tab-btn" id="tabDocsBtn" data-target="docsView" role="tab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    Lecture Library
+                </button>
+            </nav>
+
+            <!-- Status Indicator -->
+            <div class="nav-status">
+                <div class="status-indicator" id="systemStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-label" id="statusLabel">Connecting...</span>
+                </div>
+                <div class="doc-counter" id="docCounterPill" title="Indexed lecture files">
+                    <span id="docCountNum">0</span> Lectures
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Views -->
+        <main class="main-content">
+            <!-- 1. CHAT VIEW -->
+            <section class="view-panel active" id="chatView">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Welcome Hero Screen -->
+                        <div class="welcome-hero" id="welcomeHero">
+                            <div class="hero-icon">🎓</div>
+                            <h2>Welcome to your Study Assistant</h2>
+                            <p>Ask anything about your course lectures. StudyBuddy searches your indexed notes with vector similarity and synthesizes structured answers using Groq LPU.</p>
+
+                            <div class="quick-prompts">
+                                <span class="quick-title">Quick Study Prompts:</span>
+                                <div class="prompt-grid">
+                                    <button class="quick-card" data-prompt="/summary Agile vs Waterfall Models">
+                                        <div class="qc-mode">📝 /summary</div>
+                                        <div class="qc-text">Compare Agile and Waterfall development lifecycles</div>
+                                    </button>
+                                    <button class="quick-card" data-prompt="/flashcards Requirements Engineering">
+                                        <div class="qc-mode">🗂️ /flashcards</div>
+                                        <div class="qc-text">Generate flashcards on functional vs non-functional requirements</div>
+                                    </button>
+                                    <button class="quick-card" data-prompt="/feynman Critical Path Method">
+                                        <div class="qc-mode">💡 /feynman</div>
+                                        <div class="qc-text">Explain Critical Path Method like I am 12 years old</div>
+                                    </button>
+                                    <button class="quick-card" data-prompt="What are the key responsibilities of a software project manager?">
+                                        <div class="qc-mode">🔍 Search</div>
+                                        <div class="qc-text">Key responsibilities of a project manager from the notes</div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input Bar -->
+                    <div class="chat-input-wrapper">
+                        <!-- Mode Quick Chips -->
+                        <div class="mode-chips">
+                            <button class="chip-btn" id="chipSummary" data-prefix="/summary ">
+                                <span>📝</span> /summary
+                            </button>
+                            <button class="chip-btn" id="chipFlashcards" data-prefix="/flashcards ">
+                                <span>🗂️</span> /flashcards
+                            </button>
+                            <button class="chip-btn" id="chipFeynman" data-prefix="/feynman ">
+                                <span>💡</span> /feynman
+                            </button>
+                            <div class="chip-divider"></div>
+                            <button class="chip-btn chip-clear" id="clearChatBtn" title="Reset conversational turn memory">
+                                <span>🧹</span> Clear Memory
+                            </button>
+                        </div>
+
+                        <!-- Textarea & Action -->
+                        <div class="input-box-container">
+                            <textarea id="chatInput" placeholder="Ask a question about your notes or use /summary, /flashcards, /feynman..." rows="1"></textarea>
+                            <button id="sendBtn" class="send-button" title="Send message (Enter)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="input-hint">
+                            <span>Press <kbd>Enter</kbd> to send, <kbd>Shift + Enter</kbd> for newline</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. QUIZ VIEW -->
+            <section class="view-panel" id="quizView">
+                <div class="quiz-container">
+                    <!-- Quiz Configurator -->
+                    <div class="quiz-header-card" id="quizConfigCard">
+                        <div class="quiz-header-info">
+                            <h2>Interactive Knowledge Quiz</h2>
+                            <p>Generate conceptual multiple-choice questions grounded strictly in your lecture notes.</p>
+                        </div>
+
+                        <form id="quizForm" class="quiz-controls-form">
+                            <div class="control-group">
+                                <label for="quizTopicInput">Topic / Focus Concept</label>
+                                <input type="text" id="quizTopicInput" placeholder="e.g. Requirements Engineering, Agile Lifecycle, SPM" value="Software Engineering" required>
+                            </div>
+
+                            <div class="control-row">
+                                <div class="control-group">
+                                    <label>Difficulty</label>
+                                    <div class="segmented-control" id="difficultyGroup">
+                                        <button type="button" class="segment-btn" data-value="easy">Easy</button>
+                                        <button type="button" class="segment-btn active" data-value="medium">Medium</button>
+                                        <button type="button" class="segment-btn" data-value="hard">Hard</button>
+                                    </div>
+                                </div>
+
+                                <div class="control-group">
+                                    <label>Questions</label>
+                                    <div class="segmented-control" id="countGroup">
+                                        <button type="button" class="segment-btn active" data-value="3">3</button>
+                                        <button type="button" class="segment-btn" data-value="5">5</button>
+                                        <button type="button" class="segment-btn" data-value="10">10</button>
+                                    </div>
+                                </div>
+
+                                <div class="control-group submit-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" id="generateQuizBtn" class="primary-btn">
+                                        <span class="btn-text">Generate Quiz</span>
+                                        <span class="btn-spinner" style="display: none;"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Active Quiz Card (Hidden by default) -->
+                    <div class="quiz-active-card" id="quizActiveCard" style="display: none;">
+                        <div class="quiz-progress-bar-container">
+                            <div class="quiz-progress-fill" id="quizProgressFill"></div>
+                        </div>
+
+                        <div class="quiz-card-header">
+                            <span class="badge-topic" id="activeTopicBadge">Software Engineering</span>
+                            <span class="badge-step" id="activeStepBadge">Question 1 of 5</span>
+                        </div>
+
+                        <div class="quiz-question-box">
+                            <h3 id="activeQuestionText">Question text will appear here...</h3>
+                        </div>
+
+                        <!-- Options List -->
+                        <div class="quiz-options-list" id="activeOptionsList">
+                            <!-- Dynamic Option Buttons -->
+                        </div>
+
+                        <!-- Immediate Explanation Banner -->
+                        <div class="quiz-feedback-banner" id="quizFeedbackBanner" style="display: none;">
+                            <div class="feedback-header">
+                                <span class="feedback-icon" id="feedbackIcon">✓</span>
+                                <span class="feedback-title" id="feedbackTitle">Correct!</span>
+                            </div>
+                            <div class="feedback-body" id="feedbackExplanation">Explanation text...</div>
+                            <div class="feedback-citation" id="feedbackCitation">Source: Document.pdf (Page 1)</div>
+                        </div>
+
+                        <div class="quiz-card-footer">
+                            <button id="nextQuestionBtn" class="primary-btn" style="display: none;">
+                                Next Question →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quiz Summary / Results Card (Hidden by default) -->
+                    <div class="quiz-results-card" id="quizResultsCard" style="display: none;">
+                        <div class="results-header">
+                            <div class="results-score-badge" id="scoreCircle">
+                                <span class="score-percent" id="scorePercent">100%</span>
+                                <span class="score-ratio" id="scoreRatio">5 / 5 Correct</span>
+                            </div>
+                            <div class="results-message">
+                                <h3 id="scoreTitle">Outstanding Mastery!</h3>
+                                <p id="scoreSubtitle">You scored 5 out of 5 questions correctly.</p>
+                            </div>
+                        </div>
+
+                        <div class="results-breakdown" id="resultsBreakdown">
+                            <!-- Review questions -->
+                        </div>
+
+                        <div class="results-actions">
+                            <button id="retakeQuizBtn" class="primary-btn">Try Another Quiz</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. DOCUMENTS / LECTURE LIBRARY VIEW -->
+            <section class="view-panel" id="docsView">
+                <div class="docs-container">
+                    <div class="docs-header">
+                        <div>
+                            <h2>Indexed Lecture Library</h2>
+                            <p>Manage course PDFs stored in <code>./lectures/</code>. All documents are chunked and converted into ChromaDB vectors.</p>
+                        </div>
+                        <button id="reindexBtn" class="secondary-btn">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                            Re-index Vector Store
+                        </button>
+                    </div>
+
+                    <!-- Upload Card -->
+                    <div class="upload-dropzone" id="dropzone">
+                        <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;">
+                        <div class="dropzone-content">
+                            <div class="dropzone-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                            <h3>Upload New Lecture PDF</h3>
+                            <p>Drag and drop your course slides or notes here, or <span class="browse-link" id="browseFilesBtn">browse files</span></p>
+                            <span class="upload-hint">Supported format: .pdf (Auto-indexes on upload)</span>
+                        </div>
+                    </div>
+
+                    <!-- Documents Grid -->
+                    <div class="docs-section-title">Currently Indexed Documents</div>
+                    <div class="docs-grid" id="docsGrid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Application Logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

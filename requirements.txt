@@ -9,3 +9,6 @@ sentence-transformers
 python-dotenv
 rich
 pydantic
+fastapi
+uvicorn
+python-multipart
